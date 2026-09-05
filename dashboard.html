@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistem Manajemen Keuangan</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-wallet"></i> FinTrack</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li class="active"><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="transaksi.html"><i class="fas fa-exchange-alt"></i> Transaksi</a></li>
+                <li><a href="data-keuangan.html"><i class="fas fa-table"></i> Data Keuangan</a></li>
+                <li><a href="calculator.html"><i class="fas fa-calculator"></i> Kalkulator</a></li>
+                <li><a href="#" id="export-pdf"><i class="fas fa-file-pdf"></i> Export PDF</a></li>
+                <li class="logout"><a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <button id="toggle-sidebar"><i class="fas fa-bars"></i></button>
+                <div class="user-info">
+                    <span>Selamat Datang, <strong id="username-display">User</strong></span>
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
+                </div>
+            </header>
+
+            <div class="dashboard-content">
+                <h1>Dashboard Keuangan</h1>
+                
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="card income">
+                        <div class="card-icon"><i class="fas fa-arrow-down"></i></div>
+                        <div class="card-content">
+                            <h3>Total Pemasukan</h3>
+                            <p class="amount" id="total-income">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="card expense">
+                        <div class="card-icon"><i class="fas fa-arrow-up"></i></div>
+                        <div class="card-content">
+                            <h3>Total Pengeluaran</h3>
+                            <p class="amount" id="total-expense">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="card balance">
+                        <div class="card-icon"><i class="fas fa-wallet"></i></div>
+                        <div class="card-content">
+                            <h3>Saldo Akhir</h3>
+                            <p class="amount" id="final-balance">Rp 0</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Charts -->
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3>Pemasukan vs Pengeluaran</h3>
+                        <canvas id="income-expense-chart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>Tren Saldo</h3>
+                        <canvas id="balance-trend-chart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Recent Transactions -->
+                <div class="recent-transactions">
+                    <div class="section-header">
+                        <h3>Transaksi Terbaru</h3>
+                        <a href="transaksi.html" class="btn-small">Tambah Transaksi</a>
+                    </div>
+                    <div class="table-container">
+                        <table id="recent-transactions-table">
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Keterangan</th>
+                                    <th>Jenis</th>
+                                    <th>Jumlah</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recent-transactions-body">
+                                <!-- Transaction data will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <a href="data-keuangan.html" class="btn-link">Lihat Semua Transaksi <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Keuangan - FinTrack</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+    <style>
+        .calculator-content {
+            padding: 1.5rem;
+        }
+        
+        .calculators-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .calculator-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .calculator-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .calculator-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .calculator-card h3 i {
+            color: var(--primary-color);
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--gray-color);
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .btn-calculate {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn-calculate:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        .result-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+        
+        .result-item.total {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--primary-color);
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+            border-top: 1px dashed var(--border-color);
+        }
+        
+        .result-chart {
+            margin-top: 1.5rem;
+            height: 200px;
+        }
+
+        /* Tombol reset form */
+        .btn-reset {
+            background-color: transparent;
+            color: var(--gray-color);
+            border: 1px solid var(--border-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            width: 100%;
+        }
+        
+        .btn-reset:hover {
+            background-color: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        /* Tooltip styling */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            margin-left: 0.5rem;
+            color: var(--gray-color);
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: var(--dark-color);
+            color: white;
+            text-align: center;
+            border-radius: 6px;
+            padding: 0.5rem;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.85rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: var(--dark-color) transparent transparent transparent;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Animasi Loading */
+        .loading-spinner {
+            display: none;
+            width: 30px;
+            height: 30px;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .calculators-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-wallet"></i> FinTrack</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="transaksi.html"><i class="fas fa-exchange-alt"></i> Transaksi</a></li>
+                <li><a href="data-keuangan.html"><i class="fas fa-table"></i> Data Keuangan</a></li>
+                <li class="active"><a href="calculator.html"><i class="fas fa-calculator"></i> Kalkulator</a></li>
+                <li><a href="#" id="export-pdf"><i class="fas fa-file-pdf"></i> Export PDF</a></li>
+                <li class="logout"><a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <button id="toggle-sidebar"><i class="fas fa-bars"></i></button>
+                <div class="user-info">
+                    <span>Selamat Datang, <strong id="username-display">User</strong></span>
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
+                </div>
+            </header>
+
+            <div class="calculator-content">
+                <h1>Kalkulator Keuangan</h1>
+                <p class="page-description">Gunakan kalkulator berikut untuk membantu perencanaan keuangan Anda.</p>
+                
+                <div class="calculators-container">
+                    <!-- Kalkulator Tabungan -->
+                    <div class="calculator-card">
+                        <h3>
+                            <i class="fas fa-piggy-bank"></i> Kalkulator Tabungan
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                <span class="tooltiptext">Hitung perkembangan tabungan Anda seiring waktu dengan mempertimbangkan bunga yang dihasilkan.</span>
+                            </div>
+                        </h3>
+                        <form id="savings-calculator">
+                            <div class="form-group">
+                                <label for="initial-savings">Tabungan Awal (Rp)</label>
+                                <input type="number" id="initial-savings" name="initial-savings" min="0" step="1000" value="0">
+                            </div>
+                            <div class="form-group">
+                                <label for="monthly-contribution">Setoran Bulanan (Rp)</label>
+                                <input type="number" id="monthly-contribution" name="monthly-contribution" min="0" step="10000" value="500000">
+                            </div>
+                            <div class="form-group">
+                                <label for="interest-rate">Suku Bunga Tahunan (%)</label>
+                                <input type="number" id="interest-rate" name="interest-rate" min="0" max="100" step="0.1" value="3.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="savings-period">Jangka Waktu (tahun)</label>
+                                <input type="number" id="savings-period" name="savings-period" min="1" max="50" step="1" value="5">
+                            </div>
+                            <button type="button" class="btn-calculate" id="calculate-savings">
+                                <i class="fas fa-calculator"></i> Hitung
+                            </button>
+                            <button type="reset" class="btn-reset">
+                                <i class="fas fa-redo-alt"></i> Reset
+                            </button>
+                        </form>
+                        
+                        <div class="loading-spinner" id="savings-loading"></div>
+                        
+                        <div class="result-section" id="savings-result" style="display: none;">
+                            <h4>Hasil Perhitungan</h4>
+                            <div class="result-item">
+                                <span>Total Setoran:</span>
+                                <span id="total-contribution">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Total Bunga:</span>
+                                <span id="total-interest">Rp 0</span>
+                            </div>
+                            <div class="result-item total">
+                                <span>Total Tabungan:</span>
+                                <span id="total-savings">Rp 0</span>
+                            </div>
+                            <div class="result-chart">
+                                <canvas id="savings-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator KPR -->
+                    <div class="calculator-card">
+                        <h3>
+                            <i class="fas fa-home"></i> Kalkulator KPR
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                <span class="tooltiptext">Hitung cicilan KPR, total biaya bunga, dan total pembayaran Anda sesuai dengan suku bunga dan jangka waktu.</span>
+                            </div>
+                        </h3>
+                        <form id="mortgage-calculator">
+                            <div class="form-group">
+                                <label for="property-price">Harga Properti (Rp)</label>
+                                <input type="number" id="property-price" name="property-price" min="0" step="1000000" value="500000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="down-payment">Uang Muka (Rp)</label>
+                                <input type="number" id="down-payment" name="down-payment" min="0" step="1000000" value="100000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="mortgage-interest">Suku Bunga KPR (%)</label>
+                                <input type="number" id="mortgage-interest" name="mortgage-interest" min="0" max="100" step="0.1" value="7.5">
+                            </div>
+                            <div class="form-group">
+                                <label for="mortgage-term">Jangka Waktu (tahun)</label>
+                                <input type="number" id="mortgage-term" name="mortgage-term" min="1" max="30" step="1" value="20">
+                            </div>
+                            <button type="button" class="btn-calculate" id="calculate-mortgage">
+                                <i class="fas fa-calculator"></i> Hitung
+                            </button>
+                            <button type="reset" class="btn-reset">
+                                <i class="fas fa-redo-alt"></i> Reset
+                            </button>
+                        </form>
+                        
+                        <div class="loading-spinner" id="mortgage-loading"></div>
+                        
+                        <div class="result-section" id="mortgage-result" style="display: none;">
+                            <h4>Hasil Perhitungan</h4>
+                            <div class="result-item">
+                                <span>Jumlah Pinjaman:</span>
+                                <span id="loan-amount">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Cicilan per Bulan:</span>
+                                <span id="monthly-payment">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Total Bunga:</span>
+                                <span id="total-mortgage-interest">Rp 0</span>
+                            </div>
+                            <div class="result-item total">
+                                <span>Total Pembayaran:</span>
+                                <span id="total-payment">Rp 0</span>
+                            </div>
+                            <div class="result-chart">
+                                <canvas id="mortgage-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Investasi -->
+                    <div class="calculator-card">
+                        <h3>
+                            <i class="fas fa-chart-line"></i> Kalkulator Investasi
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                <span class="tooltiptext">Simulasikan pertumbuhan investasi Anda dan lihat proyeksi nilai akhir berdasarkan return tahunan yang diharapkan.</span>
+                            </div>
+                        </h3>
+                        <form id="investment-calculator">
+                            <div class="form-group">
+                                <label for="initial-investment">Investasi Awal (Rp)</label>
+                                <input type="number" id="initial-investment" name="initial-investment" min="0" step="100000" value="10000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="monthly-investment">Investasi Bulanan (Rp)</label>
+                                <input type="number" id="monthly-investment" name="monthly-investment" min="0" step="100000" value="1000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="investment-return">Return Tahunan (%)</label>
+                                <input type="number" id="investment-return" name="investment-return" min="0" max="100" step="0.1" value="8">
+                            </div>
+                            <div class="form-group">
+                                <label for="investment-period">Jangka Waktu (tahun)</label>
+                                <input type="number" id="investment-period" name="investment-period" min="1" max="50" step="1" value="10">
+                            </div>
+                            <button type="button" class="btn-calculate" id="calculate-investment">
+                                <i class="fas fa-calculator"></i> Hitung
+                            </button>
+                            <button type="reset" class="btn-reset">
+                                <i class="fas fa-redo-alt"></i> Reset
+                            </button>
+                        </form>
+                        
+                        <div class="loading-spinner" id="investment-loading"></div>
+                        
+                        <div class="result-section" id="investment-result" style="display: none;">
+                            <h4>Hasil Perhitungan</h4>
+                            <div class="result-item">
+                                <span>Total Investasi:</span>
+                                <span id="total-investment">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Total Pengembalian:</span>
+                                <span id="total-return">Rp 0</span>
+                            </div>
+                            <div class="result-item total">
+                                <span>Nilai Akhir Investasi:</span>
+                                <span id="final-investment-value">Rp 0</span>
+                            </div>
+                            <div class="result-chart">
+                                <canvas id="investment-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Anggaran -->
+                    <div class="calculator-card">
+                        <h3>
+                            <i class="fas fa-coins"></i> Kalkulator Anggaran
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                <span class="tooltiptext">Buat rencana anggaran bulanan dengan membagi pendapatan Anda ke dalam kategori-kategori utama.</span>
+                            </div>
+                        </h3>
+                        <form id="budget-calculator">
+                            <div class="form-group">
+                                <label for="monthly-income">Pendapatan Bulanan (Rp)</label>
+                                <input type="number" id="monthly-income" name="monthly-income" min="0" step="100000" value="5000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="housing-expense">Pengeluaran Rumah (%)</label>
+                                <input type="number" id="housing-expense" name="housing-expense" min="0" max="100" step="1" value="30">
+                            </div>
+                            <div class="form-group">
+                                <label for="living-expense">Pengeluaran Hidup (%)</label>
+                                <input type="number" id="living-expense" name="living-expense" min="0" max="100" step="1" value="40">
+                            </div>
+                            <div class="form-group">
+                                <label for="savings-percentage">Tabungan (%)</label>
+                                <input type="number" id="savings-percentage" name="savings-percentage" min="0" max="100" step="1" value="20">
+                            </div>
+                            <div class="form-group">
+                                <label for="other-expense">Lainnya (%)</label>
+                                <input type="number" id="other-expense" name="other-expense" min="0" max="100" step="1" value="10">
+                            </div>
+                            <button type="button" class="btn-calculate" id="calculate-budget">
+                                <i class="fas fa-calculator"></i> Hitung
+                            </button>
+                            <button type="reset" class="btn-reset">
+                                <i class="fas fa-redo-alt"></i> Reset
+                            </button>
+                        </form>
+                        
+                        <div class="loading-spinner" id="budget-loading"></div>
+                        
+                        <div class="result-section" id="budget-result" style="display: none;">
+                            <h4>Hasil Perhitungan</h4>
+                            <div class="result-item">
+                                <span>Pengeluaran Rumah:</span>
+                                <span id="housing-amount">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Pengeluaran Hidup:</span>
+                                <span id="living-amount">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Tabungan:</span>
+                                <span id="savings-amount">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Lainnya:</span>
+                                <span id="other-amount">Rp 0</span>
+                            </div>
+                            <div class="result-chart">
+                                <canvas id="budget-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Biaya Pendidikan -->
+                    <div class="calculator-card">
+                        <h3>
+                            <i class="fas fa-graduation-cap"></i> Kalkulator Biaya Pendidikan
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                <span class="tooltiptext">Rencanakan biaya pendidikan anak dengan memperhitungkan inflasi pendidikan.</span>
+                            </div>
+                        </h3>
+                        <form id="education-calculator">
+                            <div class="form-group">
+                                <label for="current-education-cost">Biaya Pendidikan Saat Ini (Rp)</label>
+                                <input type="number" id="current-education-cost" name="current-education-cost" min="0" step="1000000" value="50000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="education-inflation">Inflasi Pendidikan (%)</label>
+                                <input type="number" id="education-inflation" name="education-inflation" min="0" max="30" step="0.1" value="7">
+                            </div>
+                            <div class="form-group">
+                                <label for="years-until-education">Tahun Hingga Pendidikan Dimulai</label>
+                                <input type="number" id="years-until-education" name="years-until-education" min="0" max="30" step="1" value="15">
+                            </div>
+                            <div class="form-group">
+                                <label for="education-duration">Durasi Pendidikan (tahun)</label>
+                                <input type="number" id="education-duration" name="education-duration" min="1" max="10" step="1" value="4">
+                            </div>
+                            <button type="button" class="btn-calculate" id="calculate-education">
+                                <i class="fas fa-calculator"></i> Hitung
+                            </button>
+                            <button type="reset" class="btn-reset">
+                                <i class="fas fa-redo-alt"></i> Reset
+                            </button>
+                        </form>
+                        
+                        <div class="loading-spinner" id="education-loading"></div>
+                        
+                        <div class="result-section" id="education-result" style="display: none;">
+                            <h4>Hasil Perhitungan</h4>
+                            <div class="result-item">
+                                <span>Biaya Tahun Pertama:</span>
+                                <span id="first-year-cost">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Biaya Tahun Terakhir:</span>
+                                <span id="last-year-cost">Rp 0</span>
+                            </div>
+                            <div class="result-item total">
+                                <span>Total Biaya Pendidikan:</span>
+                                <span id="total-education-cost">Rp 0</span>
+                            </div>
+                            <div class="result-chart">
+                                <canvas id="education-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Pensiun -->
+                    <div class="calculator-card">
+                        <h3>
+                            <i class="fas fa-umbrella-beach"></i> Kalkulator Pensiun
+                            <div class="tooltip">
+                                <i class="fas fa-info-circle"></i>
+                                <span class="tooltiptext">Hitung berapa dana yang diperlukan untuk pensiun dan tabungan bulanan yang perlu disisihkan.</span>
+                            </div>
+                        </h3>
+                        <form id="retirement-calculator">
+                            <div class="form-group">
+                                <label for="current-age">Usia Saat Ini</label>
+                                <input type="number" id="current-age" name="current-age" min="18" max="65" step="1" value="30">
+                            </div>
+                            <div class="form-group">
+                                <label for="retirement-age">Usia Pensiun</label>
+                                <input type="number" id="retirement-age" name="retirement-age" min="40" max="70" step="1" value="55">
+                            </div>
+                            <div class="form-group">
+                                <label for="life-expectancy">Harapan Hidup (tahun)</label>
+                                <input type="number" id="life-expectancy" name="life-expectancy" min="60" max="100" step="1" value="80">
+                            </div>
+                            <div class="form-group">
+                                <label for="monthly-expenses">Pengeluaran Bulanan Saat Ini (Rp)</label>
+                                <input type="number" id="monthly-expenses" name="monthly-expenses" min="0" step="100000" value="3000000">
+                            </div>
+                            <div class="form-group">
+                                <label for="inflation-rate">Tingkat Inflasi (%)</label>
+                                <input type="number" id="inflation-rate" name="inflation-rate" min="0" max="20" step="0.1" value="4">
+                            </div>
+                            <div class="form-group">
+                                <label for="investment-rate">Tingkat Return Investasi (%)</label>
+                                <input type="number" id="investment-rate" name="investment-rate" min="0" max="20" step="0.1" value="7">
+                            </div>
+                            <div class="form-group">
+                                <label for="current-savings">Tabungan Saat Ini (Rp)</label>
+                                <input type="number" id="current-savings" name="current-savings" min="0" step="1000000" value="50000000">
+                            </div>
+                            <button type="button" class="btn-calculate" id="calculate-retirement">
+                                <i class="fas fa-calculator"></i> Hitung
+                            </button>
+                            <button type="reset" class="btn-reset">
+                                <i class="fas fa-redo-alt"></i> Reset
+                            </button>
+                        </form>
+                        
+                        <div class="loading-spinner" id="retirement-loading"></div>
+                        
+                        <div class="result-section" id="retirement-result" style="display: none;">
+                            <h4>Hasil Perhitungan</h4>
+                            <div class="result-item">
+                                <span>Pengeluaran Bulanan Saat Pensiun:</span>
+                                <span id="retirement-monthly-expenses">Rp 0</span>
+                            </div>
+                            <div class="result-item">
+                                <span>Total Dana Pensiun yang Diperlukan:</span>
+                                <span id="required-retirement-fund">Rp 0</span>
+                            </div>
+                            <div class="result-item total">
+                                <span>Tabungan Bulanan yang Diperlukan:</span>
+                                <span id="required-monthly-savings">Rp 0</span>
+                            </div>
+                            <div class="result-chart">
+                                <canvas id="retirement-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

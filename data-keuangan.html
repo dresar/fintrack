@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Keuangan - Sistem Manajemen Keuangan</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-wallet"></i> FinTrack</h2>
+            </div>
+            <ul class="sidebar-menu">
+                <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                <li><a href="transaksi.html"><i class="fas fa-exchange-alt"></i> Transaksi</a></li>
+                <li class="active"><a href="data-keuangan.html"><i class="fas fa-table"></i> Data Keuangan</a></li>
+                <li><a href="calculator.html"><i class="fas fa-calculator"></i> Kalkulator</a></li>
+                <li><a href="#" id="export-pdf"><i class="fas fa-file-pdf"></i> Export PDF</a></li>
+                <li class="logout"><a href="login.html"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+            </ul>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <button id="toggle-sidebar"><i class="fas fa-bars"></i></button>
+                <div class="user-info">
+                    <span>Selamat Datang, <strong id="username-display">User</strong></span>
+                    <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
+                </div>
+            </header>
+
+            <div class="data-keuangan-content">
+                <h1>Data Keuangan</h1>
+                
+                <!-- Filters and Controls -->
+                <div class="filters-section">
+                    <div class="filters-container">
+                        <div class="filter-group">
+                            <label for="date-range">Rentang Waktu:</label>
+                            <select id="date-range" name="date-range">
+                                <option value="all">Semua</option>
+                                <option value="today">Hari Ini</option>
+                                <option value="yesterday">Kemarin</option>
+                                <option value="this-week">Minggu Ini</option>
+                                <option value="this-month">Bulan Ini</option>
+                                <option value="last-month">Bulan Lalu</option>
+                                <option value="custom">Kustom</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group custom-date-range" id="custom-date-container" style="display: none;">
+                            <label for="date-start">Dari:</label>
+                            <input type="date" id="date-start" name="date-start">
+                            <label for="date-end">Sampai:</label>
+                            <input type="date" id="date-end" name="date-end">
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="transaction-filter">Jenis:</label>
+                            <select id="transaction-filter" name="transaction-filter">
+                                <option value="all">Semua</option>
+                                <option value="income">Pemasukan</option>
+                                <option value="expense">Pengeluaran</option>
+                            </select>
+                        </div>
+                        
+                        <div class="filter-group">
+                            <label for="category-filter">Kategori:</label>
+                            <select id="category-filter" name="category-filter">
+                                <option value="all">Semua Kategori</option>
+                                <option value="Pendapatan">Pendapatan</option>
+                                <option value="Kebutuhan">Kebutuhan</option>
+                                <option value="Utilitas">Utilitas</option>
+                                <option value="Makanan">Makanan</option>
+                                <option value="Belanja">Belanja</option>
+                                <option value="Cicilan">Cicilan</option>
+                                <option value="Hiburan">Hiburan</option>
+                                <option value="Kesehatan">Kesehatan</option>
+                                <option value="Pendidikan">Pendidikan</option>
+                                <option value="Transportasi">Transportasi</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        
+                        <button id="apply-filters" class="btn-filter">
+                            <i class="fas fa-filter"></i> Terapkan Filter
+                        </button>
+                    </div>
+                    
+                    <div class="export-options">
+                        <button id="export-to-excel" class="btn-export"><i class="fas fa-file-excel"></i> Export Excel</button>
+                        <button id="export-to-pdf" class="btn-export"><i class="fas fa-file-pdf"></i> Export PDF</button>
+                    </div>
+                </div>
+                
+                <!-- Data Table -->
+                <div class="data-table-container">
+                    <table id="financial-data-table" class="data-table">
+                        <thead>
+                            <tr>
+                                <th data-sort="date">Tanggal <i class="fas fa-sort"></i></th>
+                                <th data-sort="description">Keterangan <i class="fas fa-sort"></i></th>
+                                <th data-sort="category">Kategori <i class="fas fa-sort"></i></th>
+                                <th data-sort="type">Jenis <i class="fas fa-sort"></i></th>
+                                <th data-sort="amount">Jumlah (Rp) <i class="fas fa-sort"></i></th>
+                                <th data-sort="balance">Saldo (Rp) <i class="fas fa-sort"></i></th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="financial-data-body">
+                            <!-- Data will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <!-- Pagination -->
+                <div class="pagination-container">
+                    <div class="pagination-info">
+                        Menampilkan <span id="showing-start">0</span> sampai <span id="showing-end">0</span> dari <span id="total-entries">0</span> data
+                    </div>
+                    <div class="pagination-controls">
+                        <button id="prev-page" class="btn-page"><i class="fas fa-chevron-left"></i> Sebelumnya</button>
+                        <div id="page-numbers" class="page-numbers">
+                            <!-- Page numbers will be generated by JavaScript -->
+                        </div>
+                        <button id="next-page" class="btn-page">Selanjutnya <i class="fas fa-chevron-right"></i></button>
+                    </div>
+                </div>
+                
+                <!-- Summary Section -->
+                <div class="data-summary">
+                    <div class="summary-item">
+                        <h4>Total Pemasukan:</h4>
+                        <p id="summary-income">Rp 0</p>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Total Pengeluaran:</h4>
+                        <p id="summary-expense">Rp 0</p>
+                    </div>
+                    <div class="summary-item">
+                        <h4>Saldo Akhir:</h4>
+                        <p id="summary-balance">Rp 0</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal untuk menambah/edit transaksi -->
+            <div id="transaction-modal" class="modal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 id="modal-title">Tambah Transaksi</h3>
+                        <span class="close-modal">&times;</span>
+                    </div>
+                    <div class="modal-body">
+                        <form id="transaction-form">
+                            <input type="hidden" id="transaction-id">
+                            <div class="form-group">
+                                <label for="transaction-date">Tanggal</label>
+                                <input type="date" id="transaction-date" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="transaction-description">Keterangan</label>
+                                <input type="text" id="transaction-description" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="transaction-category">Kategori</label>
+                                <select id="transaction-category" required>
+                                    <option value="">Pilih Kategori</option>
+                                    <option value="Pendapatan">Pendapatan</option>
+                                    <option value="Kebutuhan">Kebutuhan</option>
+                                    <option value="Utilitas">Utilitas</option>
+                                    <option value="Makanan">Makanan</option>
+                                    <option value="Belanja">Belanja</option>
+                                    <option value="Cicilan">Cicilan</option>
+                                    <option value="Hiburan">Hiburan</option>
+                                    <option value="Kesehatan">Kesehatan</option>
+                                    <option value="Pendidikan">Pendidikan</option>
+                                    <option value="Transportasi">Transportasi</option>
+                                    <option value="Lainnya">Lainnya</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="transaction-type">Jenis</label>
+                                <select id="transaction-type" required>
+                                    <option value="">Pilih Jenis</option>
+                                    <option value="income">Pemasukan</option>
+                                    <option value="expense">Pengeluaran</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="transaction-amount">Jumlah (Rp)</label>
+                                <input type="number" id="transaction-amount" min="0" step="1000" required>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn-secondary" id="cancel-transaction">Batal</button>
+                        <button type="button" class="btn-primary" id="save-transaction">Simpan</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Tambahkan modal style -->
+    <style>
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1500;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+            animation: modalAnimation 0.3s ease;
+        }
+        
+        @keyframes modalAnimation {
+            from {transform: translateY(-30px); opacity: 0;}
+            to {transform: translateY(0); opacity: 1;}
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+        }
+        
+        .close-modal {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            padding: 1.5rem;
+        }
+        
+        .modal-footer {
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .btn-primary, .btn-secondary {
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+        
+        .btn-secondary {
+            background-color: var(--gray-color);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+
+    <script src="scripts.js"></script>
+</body>
+</html>
